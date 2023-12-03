@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Personas;
+use App\Models\Empresas;
 use Illuminate\Http\Request;
 
 use Illuminate\Support\Facades\Validator;
@@ -24,6 +25,7 @@ class PersonasController extends Controller
             'sApellidoPersona' => ['nullable', 'string', 'max:50', 'regex:/^[^\d]+$/'],
             'celularPersona' => ['required', 'string', 'max:15', 'min:8', 'unique:personas', 'regex:/^[0-9()+-]*$/'],
             'direccionPersona' => ['nullable', 'string', 'max:50'],
+            'nombreEmpresa' => ['required', 'string', 'max:50'],
         ], [
             'nombrePersona.regex' => 'El nombre no puede contener números.',
             'pApellidoPersona.regex' => 'El apellido no puede contener números.',
@@ -47,6 +49,15 @@ class PersonasController extends Controller
             return response()->json(['error' => 'La persona ya existe en la base de datos.'], Response::HTTP_CONFLICT);
         }
 
+        // Extraer el nombre de la empresa de la entrada
+        $nombreEmpresa = $request->nombreEmpresa;
+
+        // Verificar si la empresa existe en la base de datos
+        $existingEmpresa = Empresas::where(['nombreEmpresa' => $nombreEmpresa])->first();
+
+        if (!$existingEmpresa) {
+            return response()->json(['error' => 'La empresa no existe en la base de datos.'], Response::HTTP_NOT_FOUND);
+        }
 
         $persona = new Personas;
         $persona->nombrePersona       = $request->nombrePersona;
@@ -56,6 +67,8 @@ class PersonasController extends Controller
         $persona->direccionPersona    = $request->direccionPersona;
         $persona->estadoPersona = 1; // Establecer el estado a 1
         $persona->save();
+
+        $persona->empresas()->attach($existingEmpresa->id_empresa);
 
         $message = 'Se agregó a ' . $request->nombrePersona . ' ' . $request->pApellidoPersona;
 
@@ -73,7 +86,7 @@ class PersonasController extends Controller
     {
 
         try {
-            $persona = Personas::findOrFail($id);
+            $persona = Personas::with('Empresas')->findOrFail($id);
         } catch (ModelNotFoundException $e) {
             return response()->json(['error' => 'No se encontró a la persona para mostrarla.'], Response::HTTP_NOT_FOUND);
         }
@@ -88,9 +101,9 @@ class PersonasController extends Controller
     {
 
         try {
-            $persona = Personas::findOrFail($id);
+            $persona = Personas::with('Empresas')->findOrFail($id);
         } catch (ModelNotFoundException $e) {
-            return response()->json(['error' => 'No se encontró a la Persona para actualizarla.'], Response::HTTP_NOT_FOUND);
+            return response()->json(['error' => 'No se encontró a la persona para actualizarla.'], Response::HTTP_NOT_FOUND);
         }
 
         //VALIDACION DE CAMPOS
@@ -100,6 +113,7 @@ class PersonasController extends Controller
             'sApellidoPersona' => ['nullable', 'string', 'max:50', 'regex:/^[^\d]+$/'],
             'celularPersona' => ['required', 'string', 'max:15', 'min:8', 'regex:/^[0-9()+-]*$/', Rule::unique('personas')->ignore($id, 'id_persona')],
             'direccionPersona' => ['nullable', 'string', 'max:50'],
+            'nombreEmpresa' => ['required', 'array']
         ], [
             'nombrePersona.regex' => 'El nombre no puede contener números.',
             'pApellidoPersona.regex' => 'El apellido no puede contener números.',
@@ -123,6 +137,13 @@ class PersonasController extends Controller
             return response()->json(['error' => 'La persona ya existe en la base de datos.'], Response::HTTP_CONFLICT);
         }
 
+        // Obtener los IDs de las empresas a partir de los nombres
+        $empresaNombres = $request->nombreEmpresa;
+        $empresaIds = Empresas::whereIn('nombreEmpresa', $empresaNombres)->pluck('id_empresa')->toArray();
+
+        if (!$empresaIds) {
+            return response()->json(['error' => 'La empresa no existe en la base de datos.'], Response::HTTP_NOT_FOUND);
+        }
 
         $persona->nombrePersona       = $request->nombrePersona;
         $persona->pApellidoPersona    = $request->pApellidoPersona;
@@ -130,6 +151,9 @@ class PersonasController extends Controller
         $persona->celularPersona      = $request->celularPersona;
         $persona->direccionPersona    = $request->direccionPersona;
         $persona->save();
+
+        // Sincronizar las empresas asignadas a la persona
+        $persona->empresas()->sync($empresaIds);
 
         $message = 'Se actualizó a ' . $request->nombrePersona . ' ' . $request->pApellidoPersona;
 
@@ -164,17 +188,17 @@ class PersonasController extends Controller
     // MOSTRAR PERSONAS DESCENDENTE
     public function index()
     {
-        return Personas::orderBy('updated_at', 'desc')->get();
+        return Personas::with('empresas')->orderBy('updated_at', 'desc')->get();
     }
 
     //MOSTRAR PERSONAS ASCENDENTE
-    public function personasAscendente()
+    public function ascendente()
     {
-        return Personas::orderBy('updated_at', 'asc')->get();
+        return Personas::with('empresas')->orderBy('updated_at', 'asc')->get();
     }
 
     // MOSTRAR PERSONAS EN UN RANGO
-    public function personasPorRangoDeFechas(Request $request)
+    public function rangoDeFechas(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'fechaInicio' => 'required|date',
@@ -188,7 +212,7 @@ class PersonasController extends Controller
         $fechaInicio = $request->fechaInicio;
         $fechaFin = $request->fechaFin;
 
-        $personasEnRango = Personas::whereBetween('updated_at', [$fechaInicio, $fechaFin])->get();
+        $personasEnRango = Personas::with('empresas')->whereBetween('updated_at', [$fechaInicio, $fechaFin])->get();
 
         return response()->json(['personas' => $personasEnRango]);
     }
@@ -210,7 +234,7 @@ class PersonasController extends Controller
         $pApellidoPersona = $request->pApellidoPersona;
         $sApellidoPersona = $request->sApellidoPersona;
 
-        $query = Personas::where('nombrePersona', 'LIKE', '%' . $nombrePersona . '%')
+        $query = Personas::with('empresas')->where('nombrePersona', 'LIKE', '%' . $nombrePersona . '%')
             ->where('pApellidoPersona', 'LIKE', '%' . $pApellidoPersona . '%');
 
         if ($sApellidoPersona) {
