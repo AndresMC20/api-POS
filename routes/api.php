@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\EmpresasController;
 use App\Http\Controllers\PersonasController;
+use App\Http\Controllers\RolesController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -24,3 +25,13 @@ Route::get('empresasDescendente', [EmpresasController::class, 'index']);
 Route::get('empresasAscendente', [EmpresasController::class, 'ascendente']);
 Route::post('empresasRango', [EmpresasController::class, 'rangoDeFechas']);
 Route::post('buscadorEmpresas', [EmpresasController::class, 'buscadorEmpresas']);
+
+//ROLES
+Route::post('agregarRol', [RolesController::class, 'store']);
+Route::get('mostrarRol/{id}', [RolesController::class, 'show']);
+Route::put('actualizarRol/{id}', [RolesController::class, 'update']);
+Route::delete('borrarRol/{id}', [RolesController::class, 'destroy']);
+Route::get('rolesDescendente', [RolesController::class, 'index']);
+Route::get('rolesAscendente', [RolesController::class, 'ascendente']);
+Route::post('rolesRango', [RolesController::class, 'rangoDeFechas']);
+Route::post('buscadorRoles', [RolesController::class, 'buscadorRoles']);
