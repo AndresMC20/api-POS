@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\EmpresasController;
 use App\Http\Controllers\PersonasController;
 use App\Http\Controllers\RolesController;
@@ -35,3 +36,17 @@ Route::get('rolesDescendente', [RolesController::class, 'index']);
 Route::get('rolesAscendente', [RolesController::class, 'ascendente']);
 Route::post('rolesRango', [RolesController::class, 'rangoDeFechas']);
 Route::post('buscadorRoles', [RolesController::class, 'buscadorRoles']);
+
+//USUARIOS
+Route::post('registrarUsuario', [AuthController::class, 'register']);
+Route::get('mostrarUsuario/{id}', [AuthController::class, 'show']);
+Route::put('actualizarUsuario/{id}', [AuthController::class, 'update']);
+Route::delete('borrarUsuario/{id}', [AuthController::class, 'destroy']);
+Route::post('login', [AuthController::class, 'login']);
+Route::group(['middleware' => ['auth:sanctum']], function () {
+    Route::post('logout', [AuthController::class, 'logout']);
+});
+Route::get('usuariosDescendente', [AuthController::class, 'index']);
+Route::get('usuariosAscendente', [AuthController::class, 'ascendente']);
+Route::post('usuariosRango', [AuthController::class, 'rangoDeFechas']);
+Route::post('buscadorUsuarios', [AuthController::class, 'buscadorUsuarios']);
