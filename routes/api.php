@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CategoriasController;
 use App\Http\Controllers\EmpresasController;
 use App\Http\Controllers\PersonasController;
 use App\Http\Controllers\RolesController;
@@ -50,3 +51,13 @@ Route::get('usuariosDescendente', [AuthController::class, 'index']);
 Route::get('usuariosAscendente', [AuthController::class, 'ascendente']);
 Route::post('usuariosRango', [AuthController::class, 'rangoDeFechas']);
 Route::post('buscadorUsuarios', [AuthController::class, 'buscadorUsuarios']);
+
+//CATEGORIAS
+Route::post('agregarCategoria', [CategoriasController::class, 'store']);
+Route::get('mostrarCategoria/{id}', [CategoriasController::class, 'show']);
+Route::put('actualizarCategoria/{id}', [CategoriasController::class, 'update']);
+Route::delete('borrarCategoria/{id}', [CategoriasController::class, 'destroy']);
+Route::get('categoriasDescendente', [CategoriasController::class, 'index']);
+Route::get('categoriasAscendente', [CategoriasController::class, 'ascendente']);
+Route::post('categoriasRango', [CategoriasController::class, 'rangoDeFechas']);
+Route::post('buscadorCategorias', [CategoriasController::class, 'buscadorCategorias']);
