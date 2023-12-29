@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoriasController;
 use App\Http\Controllers\EmpresasController;
 use App\Http\Controllers\PersonasController;
+use App\Http\Controllers\ProductosController;
 use App\Http\Controllers\RolesController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -61,3 +62,13 @@ Route::get('categoriasDescendente', [CategoriasController::class, 'index']);
 Route::get('categoriasAscendente', [CategoriasController::class, 'ascendente']);
 Route::post('categoriasRango', [CategoriasController::class, 'rangoDeFechas']);
 Route::post('buscadorCategorias', [CategoriasController::class, 'buscadorCategorias']);
+
+//PRODUCTOS
+Route::post('agregarProducto', [ProductosController::class, 'store']);
+Route::get('mostrarProducto/{id}', [ProductosController::class, 'show']);
+Route::put('actualizarProducto/{id}', [ProductosController::class, 'update']);
+Route::delete('borrarProducto/{id}', [ProductosController::class, 'destroy']);
+Route::get('productosDescendente', [ProductosController::class, 'index']);
+Route::get('productosAscendente', [ProductosController::class, 'ascendente']);
+Route::post('productosRango', [ProductosController::class, 'rangoDeFechas']);
+Route::post('buscadorProductos', [ProductosController::class, 'buscadorProductos']);
