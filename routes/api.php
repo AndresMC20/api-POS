@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoriasController;
 use App\Http\Controllers\EmpresasController;
+use App\Http\Controllers\PedidosController;
 use App\Http\Controllers\PersonasController;
 use App\Http\Controllers\ProductosController;
 use App\Http\Controllers\RolesController;
@@ -72,3 +73,14 @@ Route::get('productosDescendente', [ProductosController::class, 'index']);
 Route::get('productosAscendente', [ProductosController::class, 'ascendente']);
 Route::post('productosRango', [ProductosController::class, 'rangoDeFechas']);
 Route::post('buscadorProductos', [ProductosController::class, 'buscadorProductos']);
+
+//PEDIDOS
+Route::post('agregarPedido', [PedidosController::class, 'store']);
+Route::get('mostrarPedido/{id}', [PedidosController::class, 'show']);
+Route::put('actualizarPedido/{id}', [PedidosController::class, 'update']);
+Route::delete('borrarPedido/{id}', [PedidosController::class, 'destroy']);
+Route::post('estadoPago/{id}', [PedidosController::class, 'estadoPago']);
+Route::post('pdf/{id}', [PedidosController::class, 'pdf']);
+Route::get('pedidosDescendente', [PedidosController::class, 'index']);
+Route::get('pedidosAscendente', [PedidosController::class, 'ascendente']);
+Route::post('pedidosRango', [PedidosController::class, 'rangoDeFechas']);

@@ -16,11 +16,11 @@ class Productos extends Model
         return $this->belongsTo(Categorias::class, 'id_categoria');
     }
 
-    /*
+    // Definir la relación con la tabla "pedidos"
     public function pedidos()
     {
         return $this->belongsToMany(Pedidos::class, 'detalles', 'id_producto', 'id_pedido');
     }
-    */
+    
 
 }
